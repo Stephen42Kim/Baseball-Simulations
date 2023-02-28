@@ -2,7 +2,7 @@
 """
 Created on Fri Feb 24 00:19:29 2023
 
-@author: Stephen
+@author: Brendan Walker
 """
 
 def parseTextFile(file) -> dict:

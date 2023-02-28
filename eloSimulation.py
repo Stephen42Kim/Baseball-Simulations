@@ -2,7 +2,7 @@
 """
 Created on Thu Feb 23 12:39:51 2023
 
-@author: Stephen
+@author: Brendan Walker
 """
 
 from parseText import parseTextFile

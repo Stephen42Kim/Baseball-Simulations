@@ -2,7 +2,7 @@
 """
 Created on Mon Feb 27 03:58:53 2023
 
-@author: Stephen
+@author: Stephen Kim
 """
 
 import eloSimulation
