@@ -256,13 +256,12 @@ teamWins = {key: 0 for key in teamELO2022}
 # Create MLB Simulator object
 mlb = MLBFullSeason(gameStats, teamELO2022, teamWins)
 
+
 # Simulate regular season (optional paramater is number of trials - default is 10_000)
 df = mlb.SimulateRegularSeason()
+type(df)
 #print(df)
 #print(df.index)
-
-# Normalize power rankings
-
 
 # Extract playoff teams
 nl, al = mlb.PlayoffTeamPredictor2022(df)
@@ -270,6 +269,6 @@ nl, al = mlb.PlayoffTeamPredictor2022(df)
 #print(al)
 
 # Simulate playoffs
-winners = mlb.SimulatePlayoffs(nl, al)
-print(winners)
+winners = mlb.SimulatePlayoffs(nl, al, 1000000)
+#print(winners)
 # Show odds of winning world series
