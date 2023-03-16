@@ -29,11 +29,29 @@ class Baseball():
            
     
     def simulateMatchup(self, teamA, teamB,):
-        random = np.random.uniform(0,1)             # Get random num between 0 and 1     
-        adv = ((teamA[1] + teamB[1])/100) * 5       # Home field advantage is 5% of total power in game        
+        '''Function that takes two lists as parameters, one representing each team.
+        
+        *** Home team is teamA, Away team is teamB ***
+        
+        First element in list is the team seeding.
+        Second element in list is a list containing team name and distribution.
+        
+        Calculate the winner using ratio of strength values and home/away split.
+        
+        Home team win percentage is 55%, while away team win percentage is 46%
+        https://plus.fangraphs.com/does-home-field-matter-in-the-playoffs/
+        
+        Returns the losing team seed.'''
+        
+        random = np.random.uniform(0,1)             # Get random num between 0 and 1
+        
+        adv = ((teamA[1] + teamB[1])/100) * 5       # Home field advantage is 5% of total power in game
+        
         A = teamA[1] + adv                          # Add home field advantage 
         B = teamB[1] - adv                          # Subtract away team disadvantage
-        winRatio = A/(A + B)                        # Get odds of winning for home team       
+
+        winRatio = A/(A + B)                        # Get odds of winning for home team
+        
         if random > winRatio:                       # If random num is greater than winRatio
             return teamA[0], teamA[2]               # Return seed and team name of loser
         else:                                       
@@ -124,40 +142,16 @@ class Baseball():
         '''Function that takes a two dictionaries (one for each league) and
         eliminates wild card round losers.
         Higher seeded team has home team advantage for each game.'''
-                
-        # American League 3/6 matchup
-        # Simulate each game with rotating pitcher and track losing team
-        loser1 = []
-        loser1.append(self.simulateMatchup([3, al[3][1], al[3][0]], [6, al[6][1], al[6][0]])[0])  
-        loser1.append(self.simulateMatchup([3, al[3][2], al[3][0]], [6, al[6][2], al[6][0]])[0]) 
-        loser1.append(self.simulateMatchup([3, al[3][3], al[3][0]], [6, al[6][3], al[6][0]])[0])
-        
-        # Remove the team that has lost the most (Lost best of 3)
-        l1 = mode(loser1)
-        del al[l1]
-                 
         
         # American League 4/5 matchup
         loser2 = []
         loser2.append(self.simulateMatchup([4, al[4][1], al[4][0]], [5, al[5][1], al[5][0]])[0])  
-        loser2.append(self.simulateMatchup([4, al[4][2], al[4][0]], [5, al[5][2], al[5][0]])[0]) 
-        loser2.append(self.simulateMatchup([4, al[4][3], al[4][0]], [5, al[5][3], al[5][0]])[0])
         l2 = mode(loser2)
         del al[l2]
-        
-        # National League 3/6 matchup
-        loser3 = []
-        loser3.append(self.simulateMatchup([3, nl[3][1], nl[3][0]], [6, nl[6][1], nl[6][0]])[0])  
-        loser3.append(self.simulateMatchup([3, nl[3][2], nl[3][0]], [6, nl[6][2], nl[6][0]])[0]) 
-        loser3.append(self.simulateMatchup([3, nl[3][3], nl[3][0]], [6, nl[6][3], nl[6][0]])[0])
-        l3 = mode(loser3)
-        del nl[l3]
         
         # National League 4/5 matchup
         loser4 = []
         loser4.append(self.simulateMatchup([4, nl[4][1], nl[4][0]], [5, nl[5][1], nl[5][0]])[0])  
-        loser4.append(self.simulateMatchup([4, nl[4][2], nl[4][0]], [5, nl[5][2], nl[5][0]])[0]) 
-        loser4.append(self.simulateMatchup([4, nl[4][3], nl[4][0]], [5, nl[5][3], nl[5][0]])[0])
         l4 = mode(loser4)
         del nl[l4]
         
@@ -220,57 +214,33 @@ class Baseball():
                     l1 = mode(loser1)
                     del al[l1]                       
         
-        # American League 2 vs 3/6 matchup
+        # American League 2 vs 3 matchup
         loser2 = []
         
-        # If 3th ranked team is still alive, simulate 2 vs 3 series
-        if 3 in al:                                                     
-            loser2.append(self.simulateMatchup([2, al[2][1], al[2][0]], [3, al[3][1], al[3][0]])[0])  
-            loser2.append(self.simulateMatchup([2, al[2][2], al[2][0]], [3, al[3][2], al[3][0]])[0]) 
-            loser2.append(self.simulateMatchup([3, al[3][3], al[3][0]], [2, al[2][3], al[2][0]])[0])
+        # Simulate 2 vs 3 series
+                                                          
+        loser2.append(self.simulateMatchup([2, al[2][1], al[2][0]], [3, al[3][1], al[3][0]])[0])  
+        loser2.append(self.simulateMatchup([2, al[2][2], al[2][0]], [3, al[3][2], al[3][0]])[0]) 
+        loser2.append(self.simulateMatchup([3, al[3][3], al[3][0]], [2, al[2][3], al[2][0]])[0])
             
-            # If one team reaches three losses, they are eliminated
+        # If one team reaches three losses, they are eliminated
+        if self.checkSeries(loser2) == 3:
+            l2 = mode(loser2)
+            del al[l2]
+        # Else play game 4
+        else:
+            loser2.append(self.simulateMatchup([3, al[3][1], al[3][0]], [2, al[2][1], al[2][0]])[0])  
+            
+            # If one team reaches three losses they are eliminated
             if self.checkSeries(loser2) == 3:
                 l2 = mode(loser2)
                 del al[l2]
-            # Else play game 4
+            # Else play game 5
             else:
-                loser2.append(self.simulateMatchup([3, al[3][1], al[3][0]], [2, al[2][1], al[2][0]])[0])  
-                
-                # If one team reaches three losses they are eliminated
-                if self.checkSeries(loser2) == 3:
-                    l2 = mode(loser2)
-                    del al[l2]
-                # Else play game 5
-                else:
-                    loser2.append(self.simulateMatchup([2, al[2][2], al[2][0]], [3, al[3][2], al[3][0]])[0]) 
-                    l2 = mode(loser2)
-                    del al[l2]
-                    
-        # Else if 6thth ranked team is still alive, simulate 2 vs 6 series
-        else:                                                           
-            loser2.append(self.simulateMatchup([2, al[2][1], al[2][0]], [6, al[6][1], al[6][0]])[0])  
-            loser2.append(self.simulateMatchup([2, al[2][2], al[2][0]], [6, al[6][2], al[6][0]])[0]) 
-            loser2.append(self.simulateMatchup([6, al[6][3], al[6][0]], [2, al[2][3], al[2][0]])[0])
-            
-            # If one team reaches three losses, they are eliminated
-            if self.checkSeries(loser2) == 3:
+                loser2.append(self.simulateMatchup([2, al[2][2], al[2][0]], [3, al[3][2], al[3][0]])[0]) 
                 l2 = mode(loser2)
                 del al[l2]
-            # Else play game 4
-            else:
-                loser2.append(self.simulateMatchup([6, al[6][1], al[6][0]], [2, al[2][1], al[2][0]])[0])  
-            
-                # If one team reaches three losses they are eliminated
-                if self.checkSeries(loser2) == 3:
-                    l2 = mode(loser2)
-                    del al[l2]
-                # Else play game 5
-                else:
-                    loser2.append(self.simulateMatchup([2, al[2][2], al[2][0]], [6, al[6][2], al[6][0]])[0]) 
-                    l2 = mode(loser2)
-                    del al[l2]
-                    
+                                      
         
         # National League 1 vs 4/5 matchup
         loser3 = []
@@ -324,56 +294,32 @@ class Baseball():
                     del nl[l3]
                     
         
-        # National League 2 vs 3/6 matchup
+        # National League 2 vs 3 matchup
         loser4 = []
         
-        # If 3th ranked team is still alive, simulate 2 vs 3 series
-        if 3 in nl:                                                     
-            loser4.append(self.simulateMatchup([2, nl[2][1], nl[2][0]], [3, nl[3][1], nl[3][0]])[0])  
-            loser4.append(self.simulateMatchup([2, nl[2][2], nl[2][0]], [3, nl[3][2], nl[3][0]])[0]) 
-            loser4.append(self.simulateMatchup([3, nl[3][3], nl[3][0]], [2, nl[2][3], nl[2][0]])[0])
+        # Simulate 2 vs 3 series
+                                                           
+        loser4.append(self.simulateMatchup([2, nl[2][1], nl[2][0]], [3, nl[3][1], nl[3][0]])[0])  
+        loser4.append(self.simulateMatchup([2, nl[2][2], nl[2][0]], [3, nl[3][2], nl[3][0]])[0]) 
+        loser4.append(self.simulateMatchup([3, nl[3][3], nl[3][0]], [2, nl[2][3], nl[2][0]])[0])
             
-            # If one team reaches three losses, they are eliminated
+        # If one team reaches three losses, they are eliminated
+        if self.checkSeries(loser4) == 3:
+            l4 = mode(loser4)
+            del nl[l4]
+        # Else play game 4
+        else:
+            loser4.append(self.simulateMatchup([3, nl[3][1], nl[3][0]], [2, nl[2][1], nl[2][0]])[0])  
+            
+            # If one team reaches three losses they are eliminated
             if self.checkSeries(loser4) == 3:
                 l4 = mode(loser4)
                 del nl[l4]
-            # Else play game 4
+            # Else play game 5
             else:
-                loser4.append(self.simulateMatchup([3, nl[3][1], nl[3][0]], [2, nl[2][1], nl[2][0]])[0])  
-            
-                # If one team reaches three losses they are eliminated
-                if self.checkSeries(loser4) == 3:
-                    l4 = mode(loser4)
-                    del nl[l4]
-                # Else play game 5
-                else:
-                    loser4.append(self.simulateMatchup([2, nl[2][2], nl[2][0]], [3, nl[3][2], nl[3][0]])[0]) 
-                    l4 = mode(loser4)
-                    del nl[l4]
-        
-        # Else if 6th ranked team is still alive, simulate 2 vs 6 series
-        else:                                                           
-            loser4.append(self.simulateMatchup([2, nl[2][1], nl[2][0]], [6, nl[6][1], nl[6][0]])[0])  
-            loser4.append(self.simulateMatchup([2, nl[2][2], nl[2][0]], [6, nl[6][2], nl[6][0]])[0]) 
-            loser4.append(self.simulateMatchup([6, nl[6][3], nl[6][0]], [2, nl[2][3], nl[2][0]])[0])
-            
-            # If one team reaches three losses, they are eliminated
-            if self.checkSeries(loser4) == 3:
+                loser4.append(self.simulateMatchup([2, nl[2][2], nl[2][0]], [3, nl[3][2], nl[3][0]])[0]) 
                 l4 = mode(loser4)
                 del nl[l4]
-            # Else play game 4
-            else:
-                loser4.append(self.simulateMatchup([6, nl[6][1], nl[6][0]], [2, nl[2][1], nl[2][0]])[0])  
-            
-                # If one team reaches three losses they are eliminated
-                if self.checkSeries(loser4) == 3:
-                    l4 = mode(loser4)
-                    del nl[l4]
-                # Else play game 5
-                else:
-                    loser4.append(self.simulateMatchup([2, nl[2][2], nl[2][0]], [6, nl[6][2], nl[6][0]])[0]) 
-                    l4 = mode(loser4)
-                    del nl[l4]
         
         return nl, al
     
@@ -566,7 +512,7 @@ def getPitcherStrength(file):
     ordered by WAR, and the total WAR of the bullpen. Takes a csv text file as parameter.'''
     
     # Read file containing pitchers for each team and their WAR
-    # https://www.baseball-reference.com/leagues/majors/2022-team-pitching-staffs.shtml
+    # https://www.baseball-reference.com/leagues/majors/2021-team-pitching-staffs.shtml
     df = pd.read_csv(file)
     data = np.array(df)
     
@@ -635,49 +581,25 @@ def addTeamWins(teamDict, file):
     return teamDict
 
 
-# Create dictionary of teams, team wins, and pitcher strengths for every year
-ps2016 = getPitcherStrength('2016TeamPitchers.txt') 
-ps2018 = getPitcherStrength('2018TeamPitchers.txt') 
-ps2019 = getPitcherStrength('2019TeamPitchers.txt') 
-ps2020 = getPitcherStrength('2020TeamPitchers.txt') 
+# Create dictionary of teams, team wins, and pitcher strengths for every year 
 ps2021 = getPitcherStrength('2021TeamPitchers.txt') 
-ps2022 = getPitcherStrength('2022TeamPitchers.txt')    
+   
 
 # Add regular season wins to each team
-d16 = addTeamWins(ps2016, '2016TeamWins.txt')
-d18 = addTeamWins(ps2018, '2018TeamWins.txt')
-d19 = addTeamWins(ps2019, '2019TeamWins.txt')
-d20 = addTeamWins(ps2020, '2020TeamWins.txt')
+
 d21 = addTeamWins(ps2021, '2021TeamWins.txt')
-d22 = addTeamWins(ps2022, '2022TeamWins.txt')  
-
-    
-# Recreate 2022 Postseason brackets
-nl22 = {1: ps2022['Los Angeles Dodgers'], 2: ps2022['Atlanta Braves'],
-        3: ps2022['St. Louis Cardinals'], 4: ps2022['New York Mets'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
 
 
-# Create baseball simulation object and run simulation for 2022, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
 
 
 # Recreate 2021 Postseason brackets
-nl21 = {1: ps2021['San Fransisco Giants'], 2: ps2021['Milwaukee Brewers'],
+nl21 = {1: ps2021['San Francisco Giants'], 2: ps2021['Milwaukee Brewers'],
         3: ps2021['Atlanta Braves (W)'], 4: ps2021['Los Angeles Dodgers'], 
-        5: ps2021['Cincinnati Reds'], 6: ps2021['Philadelphia Phillies']} 
+        5: ps2021['St. Louis Cardinals']} 
 
-al21 = {1: ps2021['Houston Astros (RU)'], 2: ps2021['New York Yankees'],
-        3: ps2021['Cleveland Guardians'], 4: ps2021['Toronto Blue Jays'],
-        5: ps2021['Seattle Mariners'], 6: ps2021['Tampa Bay Rays']} 
+al21 = {1: ps2021['Tampa Bay Rays'], 2: ps2021['Houston Astros (RU)'],
+        3: ps2021['Chicago White Sox'], 4: ps2021['Boston Red Sox'],
+        5: ps2021['New York Yankees']} 
 
 
 # Create baseball simulation object and run simulation for 2021, tracking time
@@ -687,74 +609,3 @@ results = b21.runSimulation(1000000)
 print()
 print("Unbatched: %s seconds" % (time.time() - start_time))
 
-
-# Recreate 2020 Postseason brackets
-nl22 = {1: ps2022['San Francisco Giants'], 2: ps2022['Milwaukee Brewers'],
-        3: ps2022['Atlanta Braves (W)'], 4: ps2022['Los Angeles Dodgers'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2020, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
-
-
-# Recreate 2019 Postseason brackets
-nl22 = {1: ps2022['Los Angeles Dodgers'], 2: ps2022['Atlanta Braves'],
-        3: ps2022['St. Louis Cardinals'], 4: ps2022['New York Mets'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2019, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
-
-
-# Recreate 2018 Postseason brackets
-nl22 = {1: ps2022['Los Angeles Dodgers'], 2: ps2022['Atlanta Braves'],
-        3: ps2022['St. Louis Cardinals'], 4: ps2022['New York Mets'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2018, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
-
-
-# Recreate 2016 Postseason brackets
-nl22 = {1: ps2022['Los Angeles Dodgers'], 2: ps2022['Atlanta Braves'],
-        3: ps2022['St. Louis Cardinals'], 4: ps2022['New York Mets'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2016, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))

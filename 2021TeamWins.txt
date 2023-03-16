@@ -1,0 +1,30 @@
+Arizona Diamondbacks, 52
+Atlanta Braves (W), 88
+Baltimore Orioles, 52
+Boston Red Sox, 92
+Chicago Cubs, 71
+Chicago White Sox, 93 
+Cincinnati Reds, 83
+Cleveland Guardians, 80
+Colorado Rockies, 74
+Detroit Tigers, 77
+Houston Astros (RU), 95
+Kansas City Royals, 74
+Los Angeles Angels, 77 
+Los Angeles Dodgers, 106
+Miami Marlins, 67
+Milwaukee Brewers, 95
+Minnesota Twins, 73
+New York Mets, 77
+New York Yankees, 92
+Oakland Athletics, 86 
+Philadelphia Phillies, 82
+Pittsburgh Pirates, 61
+San Diego Padres, 79
+Seattle Mariners, 90
+San Francisco Giants, 107
+St. Louis Cardinals, 90
+Tampa Bay Rays, 100
+Texas Rangers, 60
+Toronto Blue Jays, 91
+Washington Nationals, 65

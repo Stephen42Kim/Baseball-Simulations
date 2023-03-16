@@ -7,7 +7,8 @@ Created on Thu Feb 16 04:12:26 2023
 Note: Do not use function addTeamWins more than once. Otherwise teams wins columns
 will be added.
 
-
+10 Team playoff format for years 2016, 2018, 2019, 2021
+Each season can be done one by one, or all at the same time.
 
 """
 
@@ -29,11 +30,29 @@ class Baseball():
            
     
     def simulateMatchup(self, teamA, teamB,):
-        random = np.random.uniform(0,1)             # Get random num between 0 and 1     
-        adv = ((teamA[1] + teamB[1])/100) * 5       # Home field advantage is 5% of total power in game        
+        '''Function that takes two lists as parameters, one representing each team.
+        
+        *** Home team is teamA, Away team is teamB ***
+        
+        First element in list is the team seeding.
+        Second element in list is a list containing team name and distribution.
+        
+        Calculate the winner using ratio of strength values and home/away split.
+        
+        Home team win percentage is 55%, while away team win percentage is 46%
+        https://plus.fangraphs.com/does-home-field-matter-in-the-playoffs/
+        
+        Returns the losing team seed.'''
+        
+        random = np.random.uniform(0,1)             # Get random num between 0 and 1
+        
+        adv = ((teamA[1] + teamB[1])/100) * 5       # Home field advantage is 5% of total power in game
+        
         A = teamA[1] + adv                          # Add home field advantage 
         B = teamB[1] - adv                          # Subtract away team disadvantage
-        winRatio = A/(A + B)                        # Get odds of winning for home team       
+
+        winRatio = A/(A + B)                        # Get odds of winning for home team
+        
         if random > winRatio:                       # If random num is greater than winRatio
             return teamA[0], teamA[2]               # Return seed and team name of loser
         else:                                       
@@ -55,7 +74,7 @@ class Baseball():
         return champ
     
     
-    def runSimulation(self, trials = 1000000):
+    def runSimulation(self, trials = 1000000, season = 2022):
         '''Function that runs the playoff scenario default 1,000,000 times.
         Tracks the world series winners and plot results'''
         
@@ -67,7 +86,7 @@ class Baseball():
             #teamChamps.append(championData[i][1])
         
         df = pd.DataFrame({'Team':championData})
-        self.plotResults(championData, trials)
+        self.plotResults(championData, trials, season)
         
         wins = df['Team'].value_counts()
         self.printResults(wins, trials)
@@ -75,7 +94,7 @@ class Baseball():
         return championData
     
     
-    def plotResults(self, championData, trials):
+    def plotResults(self, championData, trials, season):
         '''Function that plots the results in a bargraph'''
         
         df = pd.DataFrame({'Team':championData})
@@ -94,9 +113,10 @@ class Baseball():
         self.addlabels(team, pct)
      
         plt.xticks(rotation = 60)
-        plt.title('Odds of Winning the World Series 2022 Edition - Pitcher WAR')
+        plt.title('Odds of Winning the World Series {} Edition - Pitcher WAR'.format(season))
         plt.xlabel("Teams")
         plt.ylabel("Win Percentage")
+        plt.rc('font', size = 12)
         plt.show()
         
 
@@ -636,19 +656,9 @@ def addTeamWins(teamDict, file):
 
 
 # Create dictionary of teams, team wins, and pitcher strengths for every year
-ps2016 = getPitcherStrength('2016TeamPitchers.txt') 
-ps2018 = getPitcherStrength('2018TeamPitchers.txt') 
-ps2019 = getPitcherStrength('2019TeamPitchers.txt') 
-ps2020 = getPitcherStrength('2020TeamPitchers.txt') 
-ps2021 = getPitcherStrength('2021TeamPitchers.txt') 
 ps2022 = getPitcherStrength('2022TeamPitchers.txt')    
 
 # Add regular season wins to each team
-d16 = addTeamWins(ps2016, '2016TeamWins.txt')
-d18 = addTeamWins(ps2018, '2018TeamWins.txt')
-d19 = addTeamWins(ps2019, '2019TeamWins.txt')
-d20 = addTeamWins(ps2020, '2020TeamWins.txt')
-d21 = addTeamWins(ps2021, '2021TeamWins.txt')
 d22 = addTeamWins(ps2022, '2022TeamWins.txt')  
 
     
@@ -665,96 +675,7 @@ al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
 # Create baseball simulation object and run simulation for 2022, tracking time
 b22 = Baseball(nl22, al22)
 start_time = time.time()
-results = b22.runSimulation(1000000)
+results = b22.runSimulation(1000000, 2022)
 print()
 print("Unbatched: %s seconds" % (time.time() - start_time))
 
-
-# Recreate 2021 Postseason brackets
-nl21 = {1: ps2021['San Fransisco Giants'], 2: ps2021['Milwaukee Brewers'],
-        3: ps2021['Atlanta Braves (W)'], 4: ps2021['Los Angeles Dodgers'], 
-        5: ps2021['Cincinnati Reds'], 6: ps2021['Philadelphia Phillies']} 
-
-al21 = {1: ps2021['Houston Astros (RU)'], 2: ps2021['New York Yankees'],
-        3: ps2021['Cleveland Guardians'], 4: ps2021['Toronto Blue Jays'],
-        5: ps2021['Seattle Mariners'], 6: ps2021['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2021, tracking time
-b21 = Baseball(nl21, al21)
-start_time = time.time()
-results = b21.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
-
-
-# Recreate 2020 Postseason brackets
-nl22 = {1: ps2022['San Francisco Giants'], 2: ps2022['Milwaukee Brewers'],
-        3: ps2022['Atlanta Braves (W)'], 4: ps2022['Los Angeles Dodgers'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2020, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
-
-
-# Recreate 2019 Postseason brackets
-nl22 = {1: ps2022['Los Angeles Dodgers'], 2: ps2022['Atlanta Braves'],
-        3: ps2022['St. Louis Cardinals'], 4: ps2022['New York Mets'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2019, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
-
-
-# Recreate 2018 Postseason brackets
-nl22 = {1: ps2022['Los Angeles Dodgers'], 2: ps2022['Atlanta Braves'],
-        3: ps2022['St. Louis Cardinals'], 4: ps2022['New York Mets'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2018, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
-
-
-# Recreate 2016 Postseason brackets
-nl22 = {1: ps2022['Los Angeles Dodgers'], 2: ps2022['Atlanta Braves'],
-        3: ps2022['St. Louis Cardinals'], 4: ps2022['New York Mets'], 
-        5: ps2022['San Diego Padres'], 6: ps2022['Philadelphia Phillies (RU)']} 
-
-al22 = {1: ps2022['Houston Astros (W)'], 2: ps2022['New York Yankees'],
-        3: ps2022['Cleveland Guardians'], 4: ps2022['Toronto Blue Jays'],
-        5: ps2022['Seattle Mariners'], 6: ps2022['Tampa Bay Rays']} 
-
-
-# Create baseball simulation object and run simulation for 2016, tracking time
-b22 = Baseball(nl22, al22)
-start_time = time.time()
-results = b22.runSimulation(1000000)
-print()
-print("Unbatched: %s seconds" % (time.time() - start_time))
